@@ -1,18 +1,19 @@
 
 import java.util.*;
 
-public class Huffman {
+public class Huffman 
+{
 	
 	private String input;
 	private Node huffmanTree; //the huffman tree
 	private Map<Character, String> mapping; //maps characters to binary strings
 	
-	
 	/**
 	 * The Huffman constructor
 	 * 
 	 */
-	public Huffman(String input) {
+	public Huffman(String input) 
+	{
 		
 		this.input = input;
 		mapping = new HashMap<>();
@@ -22,8 +23,8 @@ public class Huffman {
 		
 		//we'll be using a priority queue to store each node with its frequency,
 		//as we need to continually find and merge the nodes with smallest frequency
-		PriorityQueue<Node> huffman = new PriorityQueue<>();
-		
+		PriorityQueue<Node> huffmanPQueue = new PriorityQueue<Node>();
+	
 		/*
 		 * TODO:
 		 * 1) add all nodes to the priority queue
@@ -34,14 +35,50 @@ public class Huffman {
 		 * Remember to store the final tree as a global variable, as you will need it
 		 * to decode your encrypted string
 		 */
+		
+		for(Map.Entry<Character, Integer> entry:freqMap.entrySet())
+		{
+		  Node newNode=new Node(entry.getKey(), entry.getValue(), null, null);
+		  huffmanPQueue.add(newNode);
+		}
+		
+		while(huffmanPQueue.size()>1)
+		{
+		  Node lastFirstNode=huffmanPQueue.poll();
+		  Node lastSecondNode=huffmanPQueue.poll();
+		  Node parentNode=new Node(null, lastFirstNode.freq+lastSecondNode.freq, lastSecondNode, lastFirstNode);
+		  huffmanPQueue.add(parentNode);
+		}
+		this.huffmanTree=huffmanPQueue.peek();
+		
+		convertTreeToMap(huffmanTree, "");
+	}
+	
+	private void convertTreeToMap(Node currentNode, String currentString)
+	{
+	  if(currentNode.isLeaf())
+	  {
+	    Character letter=currentNode.letter;
+	    mapping.put(letter, currentString);
+	  }
+	  else
+	  {
+	    convertTreeToMap(currentNode.left, currentString+"0");
+	    convertTreeToMap(currentNode.right, currentString+"1");
+	  }
 	}
 	
 	/**
 	 * Use the global mapping to convert your input string into a binary string
 	 */
-	public String encode() {
-		//TODO
-		return null;
+	public String encode() 
+	{
+		String tempString="";
+		for(char c:input.toCharArray())
+		{
+		  tempString+=mapping.get(c);
+		}
+		return tempString;
 	}
 	
 	/**
@@ -53,9 +90,30 @@ public class Huffman {
 	 * @param encoding - the encoded string that needs to be decrypted
 	 * @return the original string (should be the same as "input")
 	 */
-	public String decode(String encoding) {
-		//TODO
-		return null;
+	public String decode(String encoding) 
+	{
+		char[] charArray=encoding.toCharArray();
+		int length=charArray.length;
+		String tempString="";
+		Node currentNode=huffmanTree;
+		for(int i=0; i<=length-1; ++i)
+		{
+	    if(charArray[i]=='0')
+	    {
+	      currentNode=currentNode.left;
+	    }
+	    else
+	    {
+	      currentNode=currentNode.right;
+	    }
+	    if(currentNode.isLeaf())
+	    {
+	      tempString+=currentNode.letter;
+	      currentNode=huffmanTree;
+	    }
+		}
+		
+		return tempString;
 	}
 	
 	/**
@@ -66,7 +124,8 @@ public class Huffman {
 	 * ex. if the string "aabc" maps to "0 0 10 11", we would have
 	 * a compression ratio of (6) / (8 * 4) = 0.1875
 	 */
-	public static double compressionRatio(String input) {
+	public static double compressionRatio(String input) 
+	{
 		Huffman h = new Huffman(input);
 		String encoding = h.encode();
 		int encodingLength = encoding.length();
@@ -78,12 +137,17 @@ public class Huffman {
 	 * We've given you this function, which helps you create
 	 * a frequency map from the input string
 	 */
-	private Map<Character, Integer> getFreqs(String input) {
+	private Map<Character, Integer> getFreqs(String input) 
+	{
 		Map<Character, Integer> freqMap = new HashMap<>();
-		for (char c : input.toCharArray()) {
-			if (freqMap.containsKey(c)) {
+		for (char c : input.toCharArray()) 
+		{
+			if (freqMap.containsKey(c)) 
+			{
 				freqMap.put(c, freqMap.get(c) + 1);
-			} else {
+			} 
+			else 
+			{
 				freqMap.put(c, 1);
 			}
 		}
@@ -99,25 +163,29 @@ public class Huffman {
 	 * a letter - the character that this node represents (only for leaves)
 	 * left and right children
 	 */
-	private class Node implements Comparable<Node> {
+	private class Node implements Comparable<Node> 
+	{
 		private Character letter; //the letter of this node (only for leaves)
 		private int freq; //frequency of this node
 		private Node left; //add a 0 to you string
 		private Node right; //add a 1 to your string
 		
-		public Node(Character letter, int freq, Node left, Node right) {
+		public Node(Character letter, int freq, Node left, Node right) 
+		{
 			this.letter = letter;
 			this.freq = freq;
 			this.left = left;
 			this.right = right;
 		}
 		
-		public boolean isLeaf() {
+		public boolean isLeaf() 
+		{
 			return left == null && right == null;
 		}
 		
 		@Override
-		public int compareTo(Node o) {
+		public int compareTo(Node o) 
+		{
 			return this.freq - o.freq;
 		}
 	}
