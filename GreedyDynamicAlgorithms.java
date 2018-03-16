@@ -26,11 +26,17 @@ public class GreedyDynamicAlgorithms
 	  ArrayList<Interval> pickedRedIntervals=new ArrayList<Interval>();
 	  for(Interval interval:red)
 	  {
-	    if(interval.start<=currentBlue.finish)
+	    if(interval.start<=currentBlue.finish && interval.finish>=currentBlue.start)
 	    {
 	      pickedRedIntervals.add(interval);
 	    }
 	  }
+	  
+	  if(pickedRedIntervals.size()==0)
+	  {
+	    return -1;
+	  }
+	  
 	  Interval.sortByFinishTime(pickedRedIntervals);
 	  int length=pickedRedIntervals.size();
 	  Interval currentRed=pickedRedIntervals.get(length-1);
@@ -46,7 +52,15 @@ public class GreedyDynamicAlgorithms
 	    }
 	  }
 	  
-	  return 1+optimalIntervals(red, blue);
+	  int restCount=optimalIntervals(red, blue);
+	  if(restCount==-1)
+	  {
+	    return -1;
+	  }
+	  else
+	  {
+	    return 1+restCount;
+	  }
 	}
 	
 	/**
